@@ -21,6 +21,7 @@ import math
 import pprint
 
 from scipy.io import savemat
+from scipy.io import loadmat
 import numpy as np
 import tensorflow as tf
 
@@ -207,7 +208,7 @@ def evaluate():
         filepath = FLAGS.test_dir
         f = [x for x in os.listdir(filepath) if '.mat' in x]
         image = [loadmat(filepath+x)['data'][np.newaxis,:,:,np.newaxis].astype(np.float32) for x in f]
-        label = [loadmat(filepath+x)['label'][np.newaxis, 7:-7, 7:-7,:].astype(np.float32) for x in f]
+        label = [loadmat(filepath+x)['label'][np.newaxis, 7:-7, 7:-7,np.newaxis].astype(np.float32) for x in f]
 
         predictions = []
         for i in xrange(len(image)):
@@ -455,6 +456,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     tf.gfile.MakeDirs(FLAGS.train_dir)
     train()
   else:
+    FLAGS.batch_size = 1
     if tf.gfile.Exists(FLAGS.eval_dir):
       if FLAGS.reload:
         evaluate()
