@@ -22,7 +22,7 @@ TensorFlow implementation of FSRCNN with quantized version. This implements illu
 
 - After training, you can evaluate performance of the model with `TensorBoard`. Run `tensorboard --logdir=/tmp/FSRCNN_eval`. Also, you can extract parameters and save them in the format `.mat` by set the flag `save` to `True`.
 
-##References
+## References
 - [FSRCNN](http://mmlab.ie.cuhk.edu.hk/projects/FSRCNN.html)
 - [CIFAR10-tutorial](https://github.com/tensorflow/models/tree/master/tutorials/image/cifar10)
 - [drakelevy/FSRCNN-TensorFlow](https://github.com/drakelevy/FSRCNN-TensorFlow)
