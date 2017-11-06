@@ -12,6 +12,8 @@ TensorFlow implementation of FSRCNN with quantized version. This implements illu
 - PIL
 
 ## Usage
+- Download the caffe training code from [here](http://mmlab.ie.cuhk.edu.hk/projects/FSRCNN.html), place folder `Train` and `Test` into `（$root)`.
+
 - Open MATLAB and run `generate_train.m` and `generate_test.m` to generate training and test data. You can also run `data_aug.m` to do data augmentation first.
 
 - Modify the flags `data_dir` and `test_dir` in `model.py` as paths to the directory.
