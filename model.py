@@ -18,9 +18,9 @@ import utils
 FLAGS = tf.app.flags.FLAGS
 
 # Basic model parameters.
-tf.app.flags.DEFINE_string('data_dir', '/home/dongchao/Desktop/ruicheng/FSRCNN_TF/Train/General-100-aug',
+tf.app.flags.DEFINE_string('data_dir', '/home/likewise-open/SENSETIME/fengruicheng/Desktop/Quantized-FSRCNN/Train/General-100-aug',
                         	"""Path to data directory.""")
-tf.app.flags.DEFINE_string('test_dir', '/home/dongchao/Desktop/ruicheng/FSRCNN_TF/Test/Set5',
+tf.app.flags.DEFINE_string('test_dir', '/home/likewise-open/SENSETIME/fengruicheng/Desktop/Quantized-FSRCNN/Test/Set5/',
 							"""Path to test data directory.""")
 tf.app.flags.DEFINE_boolean('use_fp16', False,
                             """Train the model using fp16.""")
@@ -290,6 +290,8 @@ def inference(images):
   # If we only ran this model on a single GPU, we could simplify this function
   # by replacing all instances of tf.get_variable() with tf.Variable().
   #
+
+  shape = tf.shape(images)
   # conv1
   with tf.variable_scope('conv1') as scope:
     conv1 = conv2d(images, kernel_size=[5, 5, 1, model_d], wd=0.0, stddev=0.05,
@@ -314,7 +316,7 @@ def inference(images):
   # conv3
   with tf.variable_scope('deconv') as scope:
     conv3 = deconv(conv2, kernel_size=[9, 9, 1, model_d], wd=0.0, stddev=0.001,
-                          output_size=[FLAGS.batch_size, 19, 19, 1],
+                          output_size=[FLAGS.batch_size, 3*shape[1] - 14, 3*shape[2] - 14, 1],
                           strides=[1, 3, 3, 1], scope=scope, padding='SAME')
 
   return conv3

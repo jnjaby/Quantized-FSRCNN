@@ -1,7 +1,7 @@
 clear; close all;
 %% settings
-folder = 'Train/General-100';%
-savepath = 'Train/General-100/train.h5';%
+folder = 'Train/General-100-aug';%
+savepath = 'Train/General-100-aug/train.h5';%
 size_input = 11;% There are 4 pixels padding. Paper presents 7
 size_label = 19;% (11-4) *3 - (3-1)
 scale = 3;

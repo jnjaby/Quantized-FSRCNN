@@ -22,6 +22,7 @@ import pprint
 
 from scipy.io import savemat
 from scipy.io import loadmat
+from scipy.misc import imsave
 import numpy as np
 import tensorflow as tf
 
@@ -39,7 +40,7 @@ tf.app.flags.DEFINE_string('eval_dir', '/tmp/FSRCNN_eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'test' or 'train_eval'.""")
-tf.app.flags.DEFINE_string('gpu', '0,1',
+tf.app.flags.DEFINE_string('gpu', '0',
                            """Which GPU would be used.""")
 tf.app.flags.DEFINE_integer('batch_size', 128,
                             """Number of images to process in a batch.""")
@@ -48,7 +49,7 @@ tf.app.flags.DEFINE_integer('max_steps', 15000000,
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60,
                             """How often to run the eval.""")
 tf.app.flags.DEFINE_float('lr', 1e-3,
-                            """Learning rate for training phase.""")
+                          """Learning rate for training phase.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")
 tf.app.flags.DEFINE_boolean('reload', False,
@@ -61,6 +62,7 @@ tf.app.flags.DEFINE_boolean('run_once', False,
                             """Whether to run eval only once.""")
 tf.app.flags.DEFINE_boolean('quantize', False,
                             """Indicating to use quantized version.""")
+
 
 def save_filters(sess, step):
   """Save filters as .mat for FSRCNN_test released by Dong Chao.
@@ -174,6 +176,7 @@ def evaluate():
 
     # Build the summary operation based on the TF collection of Summaries.
     tf.summary.scalar('Avg_PSNR', avg_psnr)
+    tf.summary.image('HR', resized_images, max_outputs=5)
     summary_op = tf.summary.merge_all()
     summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
@@ -212,7 +215,9 @@ def evaluate():
 
         predictions = []
         for i in xrange(len(image)):
-          predictions.append(sess.run(psnr, feed_dict={images:image[i],labels:label[i]}))
+          prediction, im = sess.run([psnr, resized_images], feed_dict={images:image[i],labels:label[i]})
+          predictions.append(prediction)
+          imsave(os.path.join(FLAGS.eval_dir, str(i) + '.png'), (255*im[0, :, :, 0]).astype(np.uint8))
 
         # Compute PSNR.
         avg_pred = sum(predictions)/len(predictions)
@@ -222,7 +227,7 @@ def evaluate():
           save_filters(sess=sess, step=global_step)
 
         summary = tf.Summary()
-        summary.ParseFromString(sess.run(summary_op, feed_dict={images:image[2],labels:label[2],avg_psnr:avg_pred}))
+        summary.ParseFromString(sess.run(summary_op, feed_dict={images:image[0],labels:label[0],avg_psnr:avg_pred}))
         summary_writer.add_summary(summary, global_step)
       except Exception as e:  # pylint: disable=broad-except
         coord.request_stop(e)
@@ -419,7 +424,7 @@ def train():
       start_time = time.time()
       _, loss_value = sess.run([train_op, loss])
       duration = time.time() - start_time
-      
+
       assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
       if step % 10 == 0:
