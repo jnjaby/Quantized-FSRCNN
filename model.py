@@ -32,8 +32,8 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = utils.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
 # Global constants for setting the model.
 # bitW and bitA are the fractional part of weights and activations, respectively.
-bitW = 12
-bitA = 12
+bitW = 5
+bitA = 5
 model_d, model_s, model_m = 32, 5, 1
 
 # If a model is trained with multiple GPUs, prefix all Op names with tower_name
@@ -114,11 +114,12 @@ def quantize(x, k, is_var=True):
     Returns:
       Tensor with the same shape of x.
     """
-    n = 2**k
+    frac_n = 2**k
+    int_n = 2**(8-1-k)
     with tf.name_scope('quantize'):
       with tf.get_default_graph().gradient_override_map({'Round':'Identity'}):
-        x = tf.round(x * n) / n
-        x = x + tf.stop_gradient(tf.clip_by_value(x, -8, 8-1/n) - x)
+        x = tf.round(x * frac_n) / frac_n
+        x = x + tf.stop_gradient(tf.clip_by_value(x, -int_n, int_n - 1/frac_n) - x)
         if is_var:
           tf.add_to_collection('quantize', x)
         return x
